@@ -20,20 +20,21 @@
     var CONFIG = {"hostname":"yoursite.com","root":"/","scheme":"Gemini","version":"7.8.0","exturl":false,"sidebar":{"position":"left","display":"post","padding":18,"offset":12,"onmobile":false},"copycode":{"enable":false,"show_result":false,"style":null},"back2top":{"enable":true,"sidebar":false,"scrollpercent":false},"bookmark":{"enable":false,"color":"#222","save":"auto"},"fancybox":false,"mediumzoom":false,"lazyload":false,"pangu":false,"comments":{"style":"tabs","active":null,"storage":true,"lazyload":false,"nav":null},"algolia":{"hits":{"per_page":10},"labels":{"input_placeholder":"Search for Posts","hits_empty":"We didn't find any results for the search: ${query}","hits_stats":"${hits} results found in ${time} ms"}},"localsearch":{"enable":false,"trigger":"auto","top_n_per_article":1,"unescape":false,"preload":false},"motion":{"enable":true,"async":false,"transition":{"post_block":"fadeIn","post_header":"slideDownIn","post_body":"slideDownIn","coll_header":"slideLeftIn","sidebar":"slideUpIn"}}};
   </script>
 
-  <meta name="description" content="现象&amp;emsp;&amp;emsp;访问本地后台开发主页过于缓慢。检查后发现，是主页通过iframe加载的三个子布局top,left,right太卡，以单个left布局的请求时间来看，总时间长达45秒左右。">
+  <meta name="description" content="现象&amp;emsp;&amp;emsp;公司项目，新写了一个管理员后台，就是常见的那种rbac管理员后台。讨论后决定用前后端分离的模式来做。很简单，后端的接口我早早就写好了，但是客户端的同事反映出现了跨域问题。">
 <meta property="og:type" content="article">
-<meta property="og:title" content="记一次慢查询故障">
-<meta property="og:url" content="http://yoursite.com/2020/05/11/%E8%AE%B0%E4%B8%80%E6%AC%A1%E6%85%A2%E6%9F%A5%E8%AF%A2%E6%95%85%E9%9A%9C/index.html">
+<meta property="og:title" content="记一次浏览器跨域故障">
+<meta property="og:url" content="http://yoursite.com/2020/09/22/%E8%AE%B0%E4%B8%80%E6%AC%A1%E6%B5%8F%E8%A7%88%E5%99%A8%E8%B7%A8%E5%9F%9F%E6%95%85%E9%9A%9C/index.html">
 <meta property="og:site_name" content="西瓜屋">
-<meta property="og:description" content="现象&amp;emsp;&amp;emsp;访问本地后台开发主页过于缓慢。检查后发现，是主页通过iframe加载的三个子布局top,left,right太卡，以单个left布局的请求时间来看，总时间长达45秒左右。">
+<meta property="og:description" content="现象&amp;emsp;&amp;emsp;公司项目，新写了一个管理员后台，就是常见的那种rbac管理员后台。讨论后决定用前后端分离的模式来做。很简单，后端的接口我早早就写好了，但是客户端的同事反映出现了跨域问题。">
 <meta property="og:locale" content="zh_CN">
-<meta property="article:published_time" content="2020-05-11T13:00:15.000Z">
-<meta property="article:modified_time" content="2020-07-14T06:15:38.711Z">
+<meta property="article:published_time" content="2020-09-22T06:04:47.000Z">
+<meta property="article:modified_time" content="2020-09-22T07:06:30.817Z">
 <meta property="article:author" content="frank">
 <meta property="article:tag" content="debug">
+<meta property="article:tag" content="跨域">
 <meta name="twitter:card" content="summary">
 
-<link rel="canonical" href="http://yoursite.com/2020/05/11/%E8%AE%B0%E4%B8%80%E6%AC%A1%E6%85%A2%E6%9F%A5%E8%AF%A2%E6%95%85%E9%9A%9C/">
+<link rel="canonical" href="http://yoursite.com/2020/09/22/%E8%AE%B0%E4%B8%80%E6%AC%A1%E6%B5%8F%E8%A7%88%E5%99%A8%E8%B7%A8%E5%9F%9F%E6%95%85%E9%9A%9C/">
 
 
 <script id="page-configurations">
@@ -46,7 +47,7 @@
   };
 </script>
 
-  <title>记一次慢查询故障 | 西瓜屋</title>
+  <title>记一次浏览器跨域故障 | 西瓜屋</title>
   
 
 
@@ -162,7 +163,7 @@
   
   
   <article itemscope itemtype="http://schema.org/Article" class="post-block" lang="zh-CN">
-    <link itemprop="mainEntityOfPage" href="http://yoursite.com/2020/05/11/%E8%AE%B0%E4%B8%80%E6%AC%A1%E6%85%A2%E6%9F%A5%E8%AF%A2%E6%95%85%E9%9A%9C/">
+    <link itemprop="mainEntityOfPage" href="http://yoursite.com/2020/09/22/%E8%AE%B0%E4%B8%80%E6%AC%A1%E6%B5%8F%E8%A7%88%E5%99%A8%E8%B7%A8%E5%9F%9F%E6%95%85%E9%9A%9C/">
 
     <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
       <meta itemprop="image" content="/images/auth.jpg">
@@ -175,7 +176,7 @@
     </span>
       <header class="post-header">
         <h1 class="post-title" itemprop="name headline">
-          记一次慢查询故障
+          记一次浏览器跨域故障
         </h1>
 
         <div class="post-meta">
@@ -184,16 +185,10 @@
                 <i class="fa fa-calendar-o"></i>
               </span>
               <span class="post-meta-item-text">发表于</span>
+              
 
-              <time title="创建时间：2020-05-11 21:00:15" itemprop="dateCreated datePublished" datetime="2020-05-11T21:00:15+08:00">2020-05-11</time>
+              <time title="创建时间：2020-09-22 14:04:47 / 修改时间：15:06:30" itemprop="dateCreated datePublished" datetime="2020-09-22T14:04:47+08:00">2020-09-22</time>
             </span>
-              <span class="post-meta-item">
-                <span class="post-meta-item-icon">
-                  <i class="fa fa-calendar-check-o"></i>
-                </span>
-                <span class="post-meta-item-text">更新于</span>
-                <time title="修改时间：2020-07-14 14:15:38" itemprop="dateModified" datetime="2020-07-14T14:15:38+08:00">2020-07-14</time>
-              </span>
 
           
             <span class="post-meta-item" title="阅读次数" id="busuanzi_container_page_pv" style="display: none;">
@@ -211,8 +206,8 @@
       </span>
       <span class="post-meta-item-text">Disqus：</span>
     
-    <a title="disqus" href="/2020/05/11/%E8%AE%B0%E4%B8%80%E6%AC%A1%E6%85%A2%E6%9F%A5%E8%AF%A2%E6%95%85%E9%9A%9C/#disqus_thread" itemprop="discussionUrl">
-      <span class="post-comments-count disqus-comment-count" data-disqus-identifier="2020/05/11/记一次慢查询故障/" itemprop="commentCount"></span>
+    <a title="disqus" href="/2020/09/22/%E8%AE%B0%E4%B8%80%E6%AC%A1%E6%B5%8F%E8%A7%88%E5%99%A8%E8%B7%A8%E5%9F%9F%E6%95%85%E9%9A%9C/#disqus_thread" itemprop="discussionUrl">
+      <span class="post-comments-count disqus-comment-count" data-disqus-identifier="2020/09/22/记一次浏览器跨域故障/" itemprop="commentCount"></span>
     </a>
   </span>
   
@@ -241,58 +236,42 @@
     <div class="post-body" itemprop="articleBody">
 
       
-        <h3 id="现象"><a href="#现象" class="headerlink" title="现象"></a>现象</h3><p>&emsp;&emsp;访问本地后台开发主页过于缓慢。<br>检查后发现，是主页通过iframe加载的三个子布局top,left,right太卡，以单个left布局的请求时间来看，总时间长达45秒左右。</p>
+        <h2 id="现象"><a href="#现象" class="headerlink" title="现象"></a>现象</h2><p>&emsp;&emsp;公司项目，新写了一个管理员后台，就是常见的那种rbac管理员后台。讨论后决定用前后端分离的模式来做。很简单，后端的接口我早早就写好了，但是客户端的同事反映出现了跨域问题。</p>
 <a id="more"></a>
-<p>&emsp;&emsp;对比远端测试环境的相同请求并没有这么长的耗时，由于远端和本地的代码一致，且两者都是访问的远端的测试环境数据库服务，所以猜测是由于本地环境配置不对造成的慢请求。</p>
-<p>&emsp;&emsp;开始调试。</p>
+<h2 id="思路"><a href="#思路" class="headerlink" title="思路"></a>思路</h2><p>&emsp;&emsp;这是浏览器控制台的报错(已做脱敏处理):</p>
+<figure class="highlight pgsql"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">Access</span> <span class="keyword">to</span> XMLHttpRequest at <span class="string">'http://admin-api.com/sugar/list?page=1&amp;perPage=10'</span> <span class="keyword">from</span> origin <span class="string">'http://admin.cn:8080'</span> has been blocked <span class="keyword">by</span> CORS <span class="keyword">policy</span>: Cannot parse <span class="keyword">Access</span>-Control-Allow-Headers response <span class="keyword">header</span> field <span class="keyword">in</span> preflight response.</span><br><span class="line">app.d49d7e2a.js:<span class="number">1</span> errError: Network Error</span><br><span class="line">chunk-libs<span class="number">.17</span>d5c9ed.js:<span class="number">116</span> <span class="keyword">GET</span> http://<span class="keyword">admin</span>-api.com/sugar/list?page=<span class="number">1</span>&amp;perPage=<span class="number">10</span> net::ERR_FAILED</span><br></pre></td></tr></table></figure>
+<p>&emsp;&emsp;关键在这句：</p>
+<figure class="highlight gauss"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">Cannot <span class="built_in">parse</span> Access-Control-Allow-Headers response <span class="built_in">header</span> field in preflight response.</span><br></pre></td></tr></table></figure>
+<p>&emsp;&emsp;字面翻译：</p>
 <ul>
-<li>第一步在该慢请求的控制器入口处打断点。<ul>
-<li>结果很快就在此处中断了。说明卡顿的原因还在后面。</li>
+<li>无法解析预检（preflight）响应中的 Access-Control-Allow-Headers 响应头字段。</li>
 </ul>
-</li>
-</ul>
-<p>&emsp;&emsp;在这个控制器中代码很少，一共三行：</p>
-<figure class="highlight php"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line">$left_tree = <span class="keyword">$this</span>-&gt;adminModel-&gt;get_nav_tree(<span class="number">0</span>, <span class="number">1</span>, <span class="string">''</span>, <span class="keyword">$this</span>-&gt;AdminLanguageId);</span><br><span class="line">$data = <span class="keyword">array</span>(<span class="string">'left_tree'</span>=&gt;$left_tree);</span><br><span class="line"><span class="keyword">$this</span>-&gt;load-&gt;view(<span class="string">'left'</span>,$data);</span><br></pre></td></tr></table></figure>
-<p>&emsp;&emsp;其实就是从数据库查出数据，拼装，载入视图，接下来逐个打断点试试。</p>
+<p>&emsp;&emsp;结合这句话分析问题：</p>
 <ul>
-<li><p>在第一行之后打断点。</p>
+<li><p>首先，preflight，即指的是 OPTION 请求，关于option请求的定义看这篇文章：<br><a href="https://www.cnblogs.com/zhaodagang8/p/11275685.html" target="_blank" rel="noopener">https://www.cnblogs.com/zhaodagang8/p/11275685.html</a></p>
+</li>
+<li><p>先猜测：option请求中的响应头字段 Access-Control-Allow-Headers 内容不合法，无法被正常解析，所以报这个错。</p>
+</li>
+<li><p>检查option响应头</p>
+<figure class="highlight yaml"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br></pre></td><td class="code"><pre><span class="line"><span class="string">HTTP/1.1</span> <span class="number">200</span> <span class="string">OK</span></span><br><span class="line"><span class="attr">Server:</span> <span class="string">nginx</span></span><br><span class="line"><span class="attr">Content-Type:</span> <span class="string">application/json</span></span><br><span class="line"><span class="attr">Transfer-Encoding:</span> <span class="string">chunked</span></span><br><span class="line"><span class="attr">Connection:</span> <span class="string">close</span></span><br><span class="line"><span class="attr">X-Powered-By:</span> <span class="string">PHP/7.2.22</span></span><br><span class="line"><span class="attr">Access-Control-Allow-Origin:</span> <span class="string">*</span></span><br><span class="line"><span class="attr">Access-Control-Allow-Headers:</span> <span class="string">Origin,</span> <span class="string">Content-Type,</span> <span class="string">Referer,</span> <span class="string">Cookie,</span>   <span class="string">X-Requested-With,</span> <span class="string">Accept,</span> <span class="string">multipart/form-data,</span> <span class="string">application/json,</span> <span class="string">token,</span> <span class="string">*/*</span></span><br><span class="line"><span class="attr">Access-Control-Allow-Methods:</span> <span class="string">GET,</span> <span class="string">POST,</span> <span class="string">PATCH,</span> <span class="string">PUT,</span> <span class="string">OPTIONS</span></span><br><span class="line"><span class="attr">Cache-Control:</span> <span class="literal">no</span><span class="string">-cache,</span> <span class="string">private</span></span><br><span class="line"><span class="attr">Date:</span> <span class="string">Tue,</span> <span class="number">22</span> <span class="string">Sep</span> <span class="number">2020</span> <span class="number">06</span><span class="string">:08:49</span> <span class="string">GMT</span></span><br></pre></td></tr></table></figure></li>
+<li><p>为了形成对照，我们先去掉这行header，看看会如何</p>
 <ul>
-<li>这回就卡住了，基本卡了40秒，可以确定是数据库慢查询导致的慢请求，但是这不能解释测试环境为什么没这问题。</li>
-</ul>
-<p>&emsp;&emsp;接下来进入到get_nav_tree方法，深究查询逻辑，寻找导致慢查询的原因。</p>
-<p>&emsp;&emsp;奇怪的事情发生了，常理说我定位到任意一个sql就可以查到问题原因了，但是在这里出现了问题，我无论把断点打在哪个位置，请求一直在超时，最后我把断点打在了入口处，发现依然超时。这下问题大条了，这说明这很有可能是一个复合bug，多个bug叠加在一起造成了这个现象。</p>
-<p>&emsp;&emsp;我继续在入口断点，测试10次，如果依然如此，那我就要去查看apache服务器的配置。</p>
-<p>&emsp;&emsp;断点查询了一会，有了一些思路。我发现一个现象，现有一个正常的慢请求接口a和非慢请求接口b，当我单独请求b时，响应速度正常。但是当我先请求a，当a还处于请求状态中的时候，我请求b，我发现b也变成了慢请求接口了。这个现象让我有一些猜测，有没有可能apache的并发模式在windows下工作的并不好？我去百度一下相关的信息。</p>
-<p>&emsp;&emsp;查了快2个小时，暂时放弃这个思路。</p>
-<p>&emsp;&emsp;先不去管apache的并发问题，重新来单独调试那个慢查询请求。</p>
-<ul>
-<li>在控制器第一行之后打断点。<ul>
-<li>秒响应，没有问题。</li>
+<li>报错变成了这样<figure class="highlight pgsql"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">Request <span class="keyword">header</span> field token <span class="keyword">is</span> <span class="keyword">not</span> allowed <span class="keyword">by</span> <span class="keyword">Access</span>-Control-Allow-Headers <span class="keyword">in</span> preflight response.</span><br></pre></td></tr></table></figure></li>
 </ul>
 </li>
-<li>在第一行数据库查询语句后打断点。<ul>
-<li>慢查询约40秒。</li>
-</ul>
+<li><p>很明显的标注，告诉我们请求头中的token字段没有被允许，接下俩我们放开注释，在Access-Control-Allow-Headers中只写一个token，看看结果。</p>
 </li>
-<li>接下来调试 get_nav_tree 方法，为防止断点影响之前的调用，写一个全局变量标识符。<ul>
-<li>在 get_nav_tree 方法里面找到一个递归调用。</li>
-<li>我打印了每次调用的执行时间，发现根据不同的判断，每次递归可能会走进不同的逻辑分支，而有的分支中还会有数据库查询操作。最内层的调用大部分时间都很短，少部分执行时间较长。而外层的调用普遍时间都较长，越外层时间越久。</li>
-</ul>
+<li><p>成功了，不再报跨域错误</p>
 </li>
-</ul>
-<h3 id="结论"><a href="#结论" class="headerlink" title="结论"></a>结论</h3><p>&emsp;&emsp;本质上，这是一个因为糟糕的代码逻辑导致的慢查询问题。递归查询数据库，也没有做递归层数限制，这还好也就是个后台代码，上线这么久了没人觉得有问题。</p>
-<h3 id="解决方案"><a href="#解决方案" class="headerlink" title="解决方案"></a>解决方案</h3><p>&emsp;&emsp;最好的方式是重写这块逻辑，问问同事，答复是没有搞头。于是我把数据库切换为本地，立刻就不慢了。</p>
-<h3 id="总结"><a href="#总结" class="headerlink" title="总结"></a>总结</h3><p>&emsp;&emsp;这次调试花了非常久的时间，从早上9点到下午两点。效率比较低下，下面列一下原因：</p>
-<ul>
-<li>开发环境不熟悉。这家公司用虚拟桌面而且是windows虚拟桌面开发，网络限制贼多，我没法复用自己以前的开发环境，问题多多。</li>
-<li>调试过程中无法有效的定位问题。<ul>
-<li>没有整块的审视代码逻辑。实际上如果事先仔细读一遍这块代码，不多也就100行。很明显就能发现这个递归调用。我的惯性思维让我就用打断点折半查找，但这种递归代码就是很难调试，我一开始还以为是这个方法在到达控制器之前就被别的地方反复调用。</li>
-<li>方法正确，但是对工具本身的不熟悉让我在调试到一个php之外的问题时无从下手。观察到问题现象以后，展现出的是一个复合问题。于是我尝试将其分割成两个问题，先集中思路解决其中一个。但是因为对apache和计算机网络相关知识的不熟悉，而且本身工作环境的网络资源受限严重，这个问题还是没能解决。 </li>
-</ul>
+<li><p>接下来通过排除法，逐一找出出问题的参数。</p>
+</li>
+<li><p>原参数是这样:</p>
+<figure class="highlight sql"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">Origin, Content-Type, Referer, Cookie, X-Requested-<span class="keyword">With</span>, <span class="keyword">Accept</span>, multipart/  <span class="keyword">form</span>-<span class="keyword">data</span>, application/<span class="keyword">json</span>, token, *<span class="comment">/*</span></span><br></pre></td></tr></table></figure></li>
+<li><p>结果是带 / 符号的都是不合法字段。</p>
 </li>
 </ul>
-</li>
-</ul>
+<h2 id="总结"><a href="#总结" class="headerlink" title="总结"></a>总结</h2><p>&emsp;&emsp;遇到过很多次的错误，但之前每次都是百度到那几个跨域用的header头，设置一下完事，没有细究过其中的原理，这次遇到的问题让我基本弄明白了跨域为什么存在，跨域拦截发生的原因，之后这种问题我相信自己都能轻松解决了。</p>
+<p>&emsp;&emsp;发现问题，描述现象，查找资料，理解原理，复现问题，解决问题。</p>
 
     </div>
 
@@ -303,6 +282,7 @@
       <footer class="post-footer">
           <div class="post-tags">
               <a href="/tags/debug/" rel="tag"># debug</a>
+              <a href="/tags/%E8%B7%A8%E5%9F%9F/" rel="tag"># 跨域</a>
           </div>
 
         
@@ -311,13 +291,10 @@
         
     <div class="post-nav">
       <div class="post-nav-item">
-    <a href="/2020/05/10/%E8%AE%B0%E4%B8%80%E6%AC%A1%E6%B5%8F%E8%A7%88%E5%99%A8%E5%9B%BE%E7%89%87%E6%97%A0%E6%B3%95%E6%98%BE%E7%A4%BA%E6%95%85%E9%9A%9C/" rel="prev" title="记一次浏览器图片无法显示故障">
-      <i class="fa fa-chevron-left"></i> 记一次浏览器图片无法显示故障
+    <a href="/2020/09/15/%E8%AE%B0%E4%B8%80%E6%AC%A1mysql%E6%AD%BB%E9%94%81%E6%95%85%E9%9A%9C/" rel="prev" title="记一次mysql死锁故障">
+      <i class="fa fa-chevron-left"></i> 记一次mysql死锁故障
     </a></div>
-      <div class="post-nav-item">
-    <a href="/2020/05/16/%E4%B8%BA%E4%BB%80%E4%B9%88%E4%B8%8D%E8%A6%81996/" rel="next" title="为什么不要996">
-      为什么不要996 <i class="fa fa-chevron-right"></i>
-    </a></div>
+      <div class="post-nav-item"></div>
     </div>
       </footer>
     
@@ -383,7 +360,7 @@
 
       <!--noindex-->
       <div class="post-toc-wrap sidebar-panel">
-          <div class="post-toc motion-element"><ol class="nav"><li class="nav-item nav-level-3"><a class="nav-link" href="#现象"><span class="nav-number">1.</span> <span class="nav-text">现象</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#结论"><span class="nav-number">2.</span> <span class="nav-text">结论</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#解决方案"><span class="nav-number">3.</span> <span class="nav-text">解决方案</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#总结"><span class="nav-number">4.</span> <span class="nav-text">总结</span></a></li></ol></div>
+          <div class="post-toc motion-element"><ol class="nav"><li class="nav-item nav-level-2"><a class="nav-link" href="#现象"><span class="nav-number">1.</span> <span class="nav-text">现象</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#思路"><span class="nav-number">2.</span> <span class="nav-text">思路</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#总结"><span class="nav-number">3.</span> <span class="nav-text">总结</span></a></li></ol></div>
       </div>
       <!--/noindex-->
 
@@ -540,9 +517,9 @@
 </script>
 <script>
   var disqus_config = function() {
-    this.page.url = "http://yoursite.com/2020/05/11/%E8%AE%B0%E4%B8%80%E6%AC%A1%E6%85%A2%E6%9F%A5%E8%AF%A2%E6%95%85%E9%9A%9C/";
-    this.page.identifier = "2020/05/11/记一次慢查询故障/";
-    this.page.title = "记一次慢查询故障";
+    this.page.url = "http://yoursite.com/2020/09/22/%E8%AE%B0%E4%B8%80%E6%AC%A1%E6%B5%8F%E8%A7%88%E5%99%A8%E8%B7%A8%E5%9F%9F%E6%95%85%E9%9A%9C/";
+    this.page.identifier = "2020/09/22/记一次浏览器跨域故障/";
+    this.page.title = "记一次浏览器跨域故障";
     };
   NexT.utils.loadComments(document.querySelector('#disqus_thread'), () => {
     if (window.DISQUS) {
