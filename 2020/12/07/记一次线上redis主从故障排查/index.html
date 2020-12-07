@@ -20,21 +20,25 @@
     var CONFIG = {"hostname":"yoursite.com","root":"/","scheme":"Gemini","version":"7.8.0","exturl":false,"sidebar":{"position":"left","display":"post","padding":18,"offset":12,"onmobile":false},"copycode":{"enable":false,"show_result":false,"style":null},"back2top":{"enable":true,"sidebar":false,"scrollpercent":false},"bookmark":{"enable":false,"color":"#222","save":"auto"},"fancybox":false,"mediumzoom":false,"lazyload":false,"pangu":false,"comments":{"style":"tabs","active":null,"storage":true,"lazyload":false,"nav":null},"algolia":{"hits":{"per_page":10},"labels":{"input_placeholder":"Search for Posts","hits_empty":"We didn't find any results for the search: ${query}","hits_stats":"${hits} results found in ${time} ms"}},"localsearch":{"enable":false,"trigger":"auto","top_n_per_article":1,"unescape":false,"preload":false},"motion":{"enable":true,"async":false,"transition":{"post_block":"fadeIn","post_header":"slideDownIn","post_body":"slideDownIn","coll_header":"slideLeftIn","sidebar":"slideUpIn"}}};
   </script>
 
-  <meta name="description" content="现象&amp;emsp;&amp;emsp;公司项目，新写了一个管理员后台，就是常见的那种rbac管理员后台。讨论后决定用前后端分离的模式来做。很简单，后端的接口我早早就写好了，但是客户端的同事反映出现了跨域问题。">
+  <meta name="description" content="&amp;emsp;&amp;emsp;还是之前哪个在生产环境运行的红包接龙小游戏发生了问题。 现象&amp;emsp;&amp;emsp;老实讲这个服务一直还是挺稳定的，一个多月没有任何问题上报到我这，但是前几天又客服反馈，用户时长会出现获得礼物为0的情况，如下图所示： &amp;emsp;&amp;emsp;这个其实现象跟上篇文章的现象是一致的，让我不禁想到难道是上回的问题没解决？ 思路&amp;emsp;&amp;emsp;我重新查询了一遍所有出现问题的">
 <meta property="og:type" content="article">
-<meta property="og:title" content="记一次浏览器跨域故障">
-<meta property="og:url" content="http://yoursite.com/2020/09/22/%E8%AE%B0%E4%B8%80%E6%AC%A1%E6%B5%8F%E8%A7%88%E5%99%A8%E8%B7%A8%E5%9F%9F%E6%95%85%E9%9A%9C/index.html">
+<meta property="og:title" content="记一次线上redis主从故障排查">
+<meta property="og:url" content="http://yoursite.com/2020/12/07/%E8%AE%B0%E4%B8%80%E6%AC%A1%E7%BA%BF%E4%B8%8Aredis%E4%B8%BB%E4%BB%8E%E6%95%85%E9%9A%9C%E6%8E%92%E6%9F%A5/index.html">
 <meta property="og:site_name" content="西瓜屋">
-<meta property="og:description" content="现象&amp;emsp;&amp;emsp;公司项目，新写了一个管理员后台，就是常见的那种rbac管理员后台。讨论后决定用前后端分离的模式来做。很简单，后端的接口我早早就写好了，但是客户端的同事反映出现了跨域问题。">
+<meta property="og:description" content="&amp;emsp;&amp;emsp;还是之前哪个在生产环境运行的红包接龙小游戏发生了问题。 现象&amp;emsp;&amp;emsp;老实讲这个服务一直还是挺稳定的，一个多月没有任何问题上报到我这，但是前几天又客服反馈，用户时长会出现获得礼物为0的情况，如下图所示： &amp;emsp;&amp;emsp;这个其实现象跟上篇文章的现象是一致的，让我不禁想到难道是上回的问题没解决？ 思路&amp;emsp;&amp;emsp;我重新查询了一遍所有出现问题的">
 <meta property="og:locale" content="zh_CN">
-<meta property="article:published_time" content="2020-09-22T06:04:47.000Z">
-<meta property="article:modified_time" content="2020-09-29T10:02:04.849Z">
+<meta property="og:image" content="http://yoursite.com/images/3.jpg">
+<meta property="og:image" content="http://yoursite.com/images/4.png">
+<meta property="og:image" content="http://yoursite.com/images/5.png">
+<meta property="article:published_time" content="2020-12-07T02:12:32.000Z">
+<meta property="article:modified_time" content="2020-12-07T13:30:21.275Z">
 <meta property="article:author" content="frank">
 <meta property="article:tag" content="debug">
-<meta property="article:tag" content="跨域">
+<meta property="article:tag" content="redis">
 <meta name="twitter:card" content="summary">
+<meta name="twitter:image" content="http://yoursite.com/images/3.jpg">
 
-<link rel="canonical" href="http://yoursite.com/2020/09/22/%E8%AE%B0%E4%B8%80%E6%AC%A1%E6%B5%8F%E8%A7%88%E5%99%A8%E8%B7%A8%E5%9F%9F%E6%95%85%E9%9A%9C/">
+<link rel="canonical" href="http://yoursite.com/2020/12/07/%E8%AE%B0%E4%B8%80%E6%AC%A1%E7%BA%BF%E4%B8%8Aredis%E4%B8%BB%E4%BB%8E%E6%95%85%E9%9A%9C%E6%8E%92%E6%9F%A5/">
 
 
 <script id="page-configurations">
@@ -47,7 +51,7 @@
   };
 </script>
 
-  <title>记一次浏览器跨域故障 | 西瓜屋</title>
+  <title>记一次线上redis主从故障排查 | 西瓜屋</title>
   
 
 
@@ -163,7 +167,7 @@
   
   
   <article itemscope itemtype="http://schema.org/Article" class="post-block" lang="zh-CN">
-    <link itemprop="mainEntityOfPage" href="http://yoursite.com/2020/09/22/%E8%AE%B0%E4%B8%80%E6%AC%A1%E6%B5%8F%E8%A7%88%E5%99%A8%E8%B7%A8%E5%9F%9F%E6%95%85%E9%9A%9C/">
+    <link itemprop="mainEntityOfPage" href="http://yoursite.com/2020/12/07/%E8%AE%B0%E4%B8%80%E6%AC%A1%E7%BA%BF%E4%B8%8Aredis%E4%B8%BB%E4%BB%8E%E6%95%85%E9%9A%9C%E6%8E%92%E6%9F%A5/">
 
     <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
       <meta itemprop="image" content="/images/auth.jpg">
@@ -176,7 +180,7 @@
     </span>
       <header class="post-header">
         <h1 class="post-title" itemprop="name headline">
-          记一次浏览器跨域故障
+          记一次线上redis主从故障排查
         </h1>
 
         <div class="post-meta">
@@ -185,16 +189,10 @@
                 <i class="fa fa-calendar-o"></i>
               </span>
               <span class="post-meta-item-text">发表于</span>
+              
 
-              <time title="创建时间：2020-09-22 14:04:47" itemprop="dateCreated datePublished" datetime="2020-09-22T14:04:47+08:00">2020-09-22</time>
+              <time title="创建时间：2020-12-07 10:12:32 / 修改时间：21:30:21" itemprop="dateCreated datePublished" datetime="2020-12-07T10:12:32+08:00">2020-12-07</time>
             </span>
-              <span class="post-meta-item">
-                <span class="post-meta-item-icon">
-                  <i class="fa fa-calendar-check-o"></i>
-                </span>
-                <span class="post-meta-item-text">更新于</span>
-                <time title="修改时间：2020-09-29 18:02:04" itemprop="dateModified" datetime="2020-09-29T18:02:04+08:00">2020-09-29</time>
-              </span>
 
           
             <span class="post-meta-item" title="阅读次数" id="busuanzi_container_page_pv" style="display: none;">
@@ -212,8 +210,8 @@
       </span>
       <span class="post-meta-item-text">Disqus：</span>
     
-    <a title="disqus" href="/2020/09/22/%E8%AE%B0%E4%B8%80%E6%AC%A1%E6%B5%8F%E8%A7%88%E5%99%A8%E8%B7%A8%E5%9F%9F%E6%95%85%E9%9A%9C/#disqus_thread" itemprop="discussionUrl">
-      <span class="post-comments-count disqus-comment-count" data-disqus-identifier="2020/09/22/记一次浏览器跨域故障/" itemprop="commentCount"></span>
+    <a title="disqus" href="/2020/12/07/%E8%AE%B0%E4%B8%80%E6%AC%A1%E7%BA%BF%E4%B8%8Aredis%E4%B8%BB%E4%BB%8E%E6%95%85%E9%9A%9C%E6%8E%92%E6%9F%A5/#disqus_thread" itemprop="discussionUrl">
+      <span class="post-comments-count disqus-comment-count" data-disqus-identifier="2020/12/07/记一次线上redis主从故障排查/" itemprop="commentCount"></span>
     </a>
   </span>
   
@@ -223,14 +221,14 @@
                 <i class="fa fa-file-word-o"></i>
               </span>
                 <span class="post-meta-item-text">本文字数：</span>
-              <span>1.8k</span>
+              <span>1.5k</span>
             </span>
             <span class="post-meta-item" title="阅读时长">
               <span class="post-meta-item-icon">
                 <i class="fa fa-clock-o"></i>
               </span>
                 <span class="post-meta-item-text">阅读时长 &asymp;</span>
-              <span>2 分钟</span>
+              <span>1 分钟</span>
             </span>
 
         </div>
@@ -242,42 +240,38 @@
     <div class="post-body" itemprop="articleBody">
 
       
-        <h2 id="现象"><a href="#现象" class="headerlink" title="现象"></a>现象</h2><p>&emsp;&emsp;公司项目，新写了一个管理员后台，就是常见的那种rbac管理员后台。讨论后决定用前后端分离的模式来做。很简单，后端的接口我早早就写好了，但是客户端的同事反映出现了跨域问题。</p>
-<a id="more"></a>
-<h2 id="思路"><a href="#思路" class="headerlink" title="思路"></a>思路</h2><p>&emsp;&emsp;这是浏览器控制台的报错(已做脱敏处理):</p>
-<figure class="highlight pgsql"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">Access</span> <span class="keyword">to</span> XMLHttpRequest at <span class="string">'http://admin-api.com/sugar/list?page=1&amp;perPage=10'</span> <span class="keyword">from</span> origin <span class="string">'http://admin.cn:8080'</span> has been blocked <span class="keyword">by</span> CORS <span class="keyword">policy</span>: Cannot parse <span class="keyword">Access</span>-Control-Allow-Headers response <span class="keyword">header</span> field <span class="keyword">in</span> preflight response.</span><br><span class="line">app.d49d7e2a.js:<span class="number">1</span> errError: Network Error</span><br><span class="line">chunk-libs<span class="number">.17</span>d5c9ed.js:<span class="number">116</span> <span class="keyword">GET</span> http://<span class="keyword">admin</span>-api.com/sugar/list?page=<span class="number">1</span>&amp;perPage=<span class="number">10</span> net::ERR_FAILED</span><br></pre></td></tr></table></figure>
-<p>&emsp;&emsp;关键在这句：</p>
-<figure class="highlight gauss"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">Cannot <span class="built_in">parse</span> Access-Control-Allow-Headers response <span class="built_in">header</span> field in preflight response.</span><br></pre></td></tr></table></figure>
-<p>&emsp;&emsp;字面翻译：</p>
-<ul>
-<li>无法解析预检（preflight）响应中的 Access-Control-Allow-Headers 响应头字段。</li>
-</ul>
-<p>&emsp;&emsp;结合这句话分析问题：</p>
-<ul>
-<li><p>首先，preflight，即指的是 OPTION 请求，关于option请求的定义看这篇文章：<br><a href="https://www.cnblogs.com/zhaodagang8/p/11275685.html" target="_blank" rel="noopener">https://www.cnblogs.com/zhaodagang8/p/11275685.html</a></p>
-</li>
-<li><p>先猜测：option请求中的响应头字段 Access-Control-Allow-Headers 内容不合法，无法被正常解析，所以报这个错。</p>
-</li>
-<li><p>检查option响应头</p>
-<figure class="highlight yaml"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br></pre></td><td class="code"><pre><span class="line"><span class="string">HTTP/1.1</span> <span class="number">200</span> <span class="string">OK</span></span><br><span class="line"><span class="attr">Server:</span> <span class="string">nginx</span></span><br><span class="line"><span class="attr">Content-Type:</span> <span class="string">application/json</span></span><br><span class="line"><span class="attr">Transfer-Encoding:</span> <span class="string">chunked</span></span><br><span class="line"><span class="attr">Connection:</span> <span class="string">close</span></span><br><span class="line"><span class="attr">X-Powered-By:</span> <span class="string">PHP/7.2.22</span></span><br><span class="line"><span class="attr">Access-Control-Allow-Origin:</span> <span class="string">*</span></span><br><span class="line"><span class="attr">Access-Control-Allow-Headers:</span> <span class="string">Origin,</span> <span class="string">Content-Type,</span> <span class="string">Referer,</span> <span class="string">Cookie,</span>   <span class="string">X-Requested-With,</span> <span class="string">Accept,</span> <span class="string">multipart/form-data,</span> <span class="string">application/json,</span> <span class="string">token,</span> <span class="string">*/*</span></span><br><span class="line"><span class="attr">Access-Control-Allow-Methods:</span> <span class="string">GET,</span> <span class="string">POST,</span> <span class="string">PATCH,</span> <span class="string">PUT,</span> <span class="string">OPTIONS</span></span><br><span class="line"><span class="attr">Cache-Control:</span> <span class="literal">no</span><span class="string">-cache,</span> <span class="string">private</span></span><br><span class="line"><span class="attr">Date:</span> <span class="string">Tue,</span> <span class="number">22</span> <span class="string">Sep</span> <span class="number">2020</span> <span class="number">06</span><span class="string">:08:49</span> <span class="string">GMT</span></span><br></pre></td></tr></table></figure></li>
-<li><p>为了形成对照，我们先去掉这行header，看看会如何</p>
-<ul>
-<li>报错变成了这样<figure class="highlight pgsql"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">Request <span class="keyword">header</span> field token <span class="keyword">is</span> <span class="keyword">not</span> allowed <span class="keyword">by</span> <span class="keyword">Access</span>-Control-Allow-Headers <span class="keyword">in</span> preflight response.</span><br></pre></td></tr></table></figure></li>
-</ul>
-</li>
-<li><p>很明显的标注，告诉我们请求头中的token字段没有被允许，接下俩我们放开注释，在Access-Control-Allow-Headers中只写一个token，看看结果。</p>
-</li>
-<li><p>成功了，不再报跨域错误</p>
-</li>
-<li><p>接下来通过排除法，逐一找出出问题的参数。</p>
-</li>
-<li><p>原参数是这样:</p>
-<figure class="highlight sql"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">Origin, Content-Type, Referer, Cookie, X-Requested-<span class="keyword">With</span>, <span class="keyword">Accept</span>, multipart/  <span class="keyword">form</span>-<span class="keyword">data</span>, application/<span class="keyword">json</span>, token, *<span class="comment">/*</span></span><br></pre></td></tr></table></figure></li>
-<li><p>结果是带 / 符号的都是不合法字段。</p>
-</li>
-</ul>
-<h2 id="总结"><a href="#总结" class="headerlink" title="总结"></a>总结</h2><p>&emsp;&emsp;遇到过很多次的错误，但之前每次都是百度到那几个跨域用的header头，设置一下完事，没有细究过其中的原理，这次遇到的问题让我基本弄明白了跨域为什么存在，跨域拦截发生的原因，之后这种问题我相信自己都能轻松解决了。</p>
-<p>&emsp;&emsp;发现问题，描述现象，查找资料，理解原理，复现问题，解决问题。</p>
+        <p>&emsp;&emsp;还是之前哪个在生产环境运行的红包接龙小游戏发生了问题。</p>
+<h2 id="现象"><a href="#现象" class="headerlink" title="现象"></a>现象</h2><p>&emsp;&emsp;老实讲这个服务一直还是挺稳定的，一个多月没有任何问题上报到我这，但是前几天又客服反馈，用户时长会出现获得礼物为0的情况，如下图所示：<br><img src="/images/3.jpg" alt=""></p>
+<p>&emsp;&emsp;这个其实现象跟上篇文章的现象是一致的，让我不禁想到难道是上回的问题没解决？</p>
+<h2 id="思路"><a href="#思路" class="headerlink" title="思路"></a>思路</h2><p>&emsp;&emsp;我重新查询了一遍所有出现问题的游戏对局的这三个字段。</p>
+<ol>
+<li>加入房间人数</li>
+<li>房间最大人数</li>
+<li>实际加入房间人数</li>
+</ol>
+<p><img src="/images/4.png" alt=""></p>
+<p>&emsp;&emsp;可以很明显的看出，132020开始，所有出现问题的对局，三个指标都相等了。</p>
+<p>&emsp;&emsp;这说明，本次问题虽然现象与之前一致，但是很可能是两个不同的原因导致的。</p>
+<p><img src="/images/5.png" alt=""></p>
+<p>&emsp;&emsp;从图中也可以看出，整个10月份和11月份的大部分都是没有问题的，直到11月28日，问题陡然出现，然年后12月3日与12月4日接连一天出现了多次。</p>
+<p>&emsp;&emsp;这里让我思考是否是28号做了什么更新，引发了这个问题？</p>
+<h2 id="猜测1：是否是28号更新了代码引发了这个问题"><a href="#猜测1：是否是28号更新了代码引发了这个问题" class="headerlink" title="猜测1：是否是28号更新了代码引发了这个问题"></a>猜测1：是否是28号更新了代码引发了这个问题</h2><p>&emsp;&emsp;带着问题我去查git的提交记录。</p>
+<p>&emsp;&emsp;最近两次的tag记录，分别在11月23日和12月2日。</p>
+<p>&emsp;&emsp;很遗憾，这否定了我的猜想，二十八号并没有发生什么更新。</p>
+<p>&emsp;&emsp;这时一个新的现象引起了我的注意，那就是12月3日和12月4日产生的异常数据中，每一局的数据返回的总奖品数量依然是约定好的总数1200。</p>
+<p>&emsp;&emsp;这意味着什么？</p>
+<p>&emsp;&emsp;这意味着随机算法在计算奖励的时候，就是按照七个人，而不是八个人来计算的。</p>
+<p>&emsp;&emsp;也就是说，问题很可能出在获取当前加入游戏用户id列表的操作上。有可能获取的用户只有7个人。</p>
+<h2 id="猜测2：是否在读取参与游戏用户列表时，只读到了部分用户id？"><a href="#猜测2：是否在读取参与游戏用户列表时，只读到了部分用户id？" class="headerlink" title="猜测2：是否在读取参与游戏用户列表时，只读到了部分用户id？"></a>猜测2：是否在读取参与游戏用户列表时，只读到了部分用户id？</h2><p>&emsp;&emsp;重新阅读代码后我发现。游戏逻辑在最后一个用户加入后，将其id写入到redis。随后开始进入结算流程。</p>
+<p>&emsp;&emsp;而在结算流程中，会从redis中取出刚写入的数据，进行游戏结算操作。</p>
+<p>&emsp;&emsp;所以，如果redis返回的数据与之前写入的数据不一致，就会发生取到的参与用户不完整，最总导致我们看到的结果。</p>
+<p>&emsp;&emsp;这个逻辑是能够自洽的。</p>
+<p>&emsp;&emsp;读不到刚刚写入的数据，我们一般称之为脏读。如果是在数据库事务中，有可能是因为主从分离后数据需要同步，以及事务的隔离性，这都会导致脏读。</p>
+<p>&emsp;&emsp;不过这是在redis中，我们暂且只考虑前一种可能。</p>
+<p>&emsp;&emsp;于是我去问了相关的同事。果不其然，12月2日晚上，线上环境的redis拆成了1主3从的主从配置。这对于调用方本来是无感知的，因为主从分离操作在阿里云的redis网关处完成。但是数据同步延迟，让我这些对一致性较为敏感的服务出错了。</p>
+<h2 id="解决方案"><a href="#解决方案" class="headerlink" title="解决方案"></a>解决方案</h2><p>&emsp;&emsp;所有一致性敏感的地方，我同意使用了自己保存的那一份数据，不在从redis中读取了。上线后还需要观察几天，看看能否真正解决这个问题。</p>
+<h2 id="总结"><a href="#总结" class="headerlink" title="总结"></a>总结</h2><p>&emsp;&emsp;一个一直稳定的服务如果出了错，如果不是更新代码导致的。那么多半就是依赖的外部服务发生了变化。</p>
+<p>&emsp;&emsp;这个方法当然不是百分百正确，不过第一时间从这个角度找问题，就算不能立刻解决，也能排除一个关键错误答案，事半功倍。</p>
 
     </div>
 
@@ -288,7 +282,7 @@
       <footer class="post-footer">
           <div class="post-tags">
               <a href="/tags/debug/" rel="tag"># debug</a>
-              <a href="/tags/%E8%B7%A8%E5%9F%9F/" rel="tag"># 跨域</a>
+              <a href="/tags/redis/" rel="tag"># redis</a>
           </div>
 
         
@@ -297,13 +291,10 @@
         
     <div class="post-nav">
       <div class="post-nav-item">
-    <a href="/2020/09/15/%E8%AE%B0%E4%B8%80%E6%AC%A1mysql%E6%AD%BB%E9%94%81%E6%95%85%E9%9A%9C/" rel="prev" title="记一次mysql死锁故障">
-      <i class="fa fa-chevron-left"></i> 记一次mysql死锁故障
+    <a href="/2020/09/26/%E8%AE%B0%E4%B8%80%E6%AC%A1%E5%B9%B6%E5%8F%91%E6%95%85%E9%9A%9C/" rel="prev" title="记一次并发故障">
+      <i class="fa fa-chevron-left"></i> 记一次并发故障
     </a></div>
-      <div class="post-nav-item">
-    <a href="/2020/09/26/%E8%AE%B0%E4%B8%80%E6%AC%A1%E5%B9%B6%E5%8F%91%E6%95%85%E9%9A%9C/" rel="next" title="记一次并发故障">
-      记一次并发故障 <i class="fa fa-chevron-right"></i>
-    </a></div>
+      <div class="post-nav-item"></div>
     </div>
       </footer>
     
@@ -369,7 +360,7 @@
 
       <!--noindex-->
       <div class="post-toc-wrap sidebar-panel">
-          <div class="post-toc motion-element"><ol class="nav"><li class="nav-item nav-level-2"><a class="nav-link" href="#现象"><span class="nav-number">1.</span> <span class="nav-text">现象</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#思路"><span class="nav-number">2.</span> <span class="nav-text">思路</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#总结"><span class="nav-number">3.</span> <span class="nav-text">总结</span></a></li></ol></div>
+          <div class="post-toc motion-element"><ol class="nav"><li class="nav-item nav-level-2"><a class="nav-link" href="#现象"><span class="nav-number">1.</span> <span class="nav-text">现象</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#思路"><span class="nav-number">2.</span> <span class="nav-text">思路</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#猜测1：是否是28号更新了代码引发了这个问题"><span class="nav-number">3.</span> <span class="nav-text">猜测1：是否是28号更新了代码引发了这个问题</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#猜测2：是否在读取参与游戏用户列表时，只读到了部分用户id？"><span class="nav-number">4.</span> <span class="nav-text">猜测2：是否在读取参与游戏用户列表时，只读到了部分用户id？</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#解决方案"><span class="nav-number">5.</span> <span class="nav-text">解决方案</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#总结"><span class="nav-number">6.</span> <span class="nav-text">总结</span></a></li></ol></div>
       </div>
       <!--/noindex-->
 
@@ -526,9 +517,9 @@
 </script>
 <script>
   var disqus_config = function() {
-    this.page.url = "http://yoursite.com/2020/09/22/%E8%AE%B0%E4%B8%80%E6%AC%A1%E6%B5%8F%E8%A7%88%E5%99%A8%E8%B7%A8%E5%9F%9F%E6%95%85%E9%9A%9C/";
-    this.page.identifier = "2020/09/22/记一次浏览器跨域故障/";
-    this.page.title = "记一次浏览器跨域故障";
+    this.page.url = "http://yoursite.com/2020/12/07/%E8%AE%B0%E4%B8%80%E6%AC%A1%E7%BA%BF%E4%B8%8Aredis%E4%B8%BB%E4%BB%8E%E6%95%85%E9%9A%9C%E6%8E%92%E6%9F%A5/";
+    this.page.identifier = "2020/12/07/记一次线上redis主从故障排查/";
+    this.page.title = "记一次线上redis主从故障排查";
     };
   NexT.utils.loadComments(document.querySelector('#disqus_thread'), () => {
     if (window.DISQUS) {
